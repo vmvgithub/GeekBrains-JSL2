@@ -4,7 +4,103 @@
         <meta charset="utf-8">
         <title>Menu page</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            ul {
+                list-style-type: none;
+            }
+        </style>
     </head>
     <body>
+        <script>
+            function Container() {
+                this.htmlCode = "";
+                this.visibility = true;
+            }
+
+            Container.prototype.render = function () {
+                return this.htmlCode;
+            };
+
+            Container.prototype.remove = function () {
+                this.visibility = false;
+            };
+
+            Container.prototype.restore = function () {
+                this.visibility = true;
+            };
+
+            function Menu(menuItems) {
+                Container.call(this);
+                this.items = menuItems;
+            }
+            Menu.prototype = Object.create(Container.prototype);
+            Menu.prototype.constructor = Menu;
+            Menu.prototype.render = function () {
+                var result = "<ul>";
+                for (var item in this.items) {
+                    if (this.items[item] instanceof MenuItem && this.items[item].visibility) {
+                        result += this.items[item].render();
+                    }
+                    if (this.items[item] instanceof subMenu && this.items[item].visibility) {
+                        result += "<li>";
+                        result += "<a href='" + this.items[item].href + "'>" + this.items[item].name + "</a>";
+                        result += this.items[item].render();
+                        result += "</li>";
+                    }
+                }
+                result += "</ul>";
+                return result;
+            };
+
+            function MenuItem(menuItemHref, menuItemName) {
+                Container.call(this);
+                this.href = menuItemHref;
+                this.name = menuItemName;
+                this.htmlCode = "<li><a href='" + this.href + "'>" + this.name + "</a></li>";
+            }
+            MenuItem.prototype = Object.create(Container.prototype);
+            MenuItem.prototype.constructor = MenuItem;
+
+            function subMenu(menuItemHref, menuItemName, menuItems) {
+                Menu.call(this);
+                this.href = menuItemHref;
+                this.name = menuItemName;
+                this.items = menuItems;
+            }
+            subMenu.prototype = Object.create(Menu.prototype);
+            subMenu.prototype.constructor = subMenu;
+
+            var subMenuItemsL3 = {
+                0: new MenuItem("#", "Пункт 1"),
+                1: new MenuItem("#", "Пункт 2"),
+                2: new MenuItem("#", "Пункт 3")
+            };
+
+            var subMenuItems = {
+                0: new subMenu("#", "О компании", subMenuItemsL3),
+                1: new MenuItem("#", "Наши успехи"),
+                2: new MenuItem("#", "Контакты")
+            };
+
+            var menuItems = {
+                0: new subMenu("#", "Главная", subMenuItems),
+                1: new MenuItem("#", "Каталог"),
+                2: new subMenu("#", "Галерея", subMenuItemsL3)
+            };
+
+            var menu = new Menu(menuItems);
+
+            document.write('Исходное меню');
+            document.write(menu.render());
+
+            document.write('Удалили последний пункт');
+            menu.items[2].remove();
+            document.write(menu.render());
+
+            document.write('Восстановили последний пункт');
+            menu.items[2].restore();
+            document.write(menu.render());
+
+        </script>
     </body>
 </html>
