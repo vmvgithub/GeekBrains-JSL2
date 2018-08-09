@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Hamburger calculator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            .container {
+                width: 800px;
+                margin: 0 auto;
+            }
+            label {
+                display: block;
+                padding: 20px;
+            }
+            .result p{
+                padding: 10px 0 0 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <form action="#">
+                <label>Размер:
+                    <select name="size">
+                        <option value="SIZE_SMALL">Маленький (50 рублей, 20 калорий)</option>
+                        <option value="SIZE_LARGE">Большой (100 рублей, 40 калорий)</option>
+                    </select>
+                </label>
+                <label>Начинка:
+                    <select name="stuffing">
+                        <option value="STUFFING_CHEESE">Сыр (10 рублей, 20 калорий)</option>
+                        <option value="STUFFING_SALAD">Салат (20 рублей, 5 калорий)</option>
+                        <option value="STUFFING_POTATO">Картофель (15 рублей, 10 калорий)</option>
+                    </select>
+                </label>
+                <label>
+                    <input type="checkbox" name="topping_spice">
+                    Приправа (15 рублей, 0 калорий)
+                </label>
+                <label>
+                    <input type="checkbox" name="topping_mayo">
+                    Майонез (20 рублей, 5 калорий)
+                </label>
+            </form>
+            <div class="result">
+                <p>Cтоимость в тугриках: <span id="cost"></span></p>
+                <p>Калорийность в калориях: <span id="calories"></span></p>
+            </div>
+        </div>
+        <script>
+            (function () {
+
+                /**
+                 * Класс, объекты которого описывают параметры гамбургера.
+                 *
+                 * @constructor
+                 */
+                function Hamburger() {
+                    this.size = Hamburger.SIZE_SMALL;
+                    this.stuffing = Hamburger.STUFFING_CHEESE;
+                    this.toppings = [];
+                }
+
+                /* Размеры, виды начинок и добавок */
+                Hamburger.SIZE_SMALL = {cost: 50, calories: 20};
+                Hamburger.SIZE_LARGE = {cost: 100, calories: 40};
+                Hamburger.STUFFING_CHEESE = {cost: 10, calories: 20};
+                Hamburger.STUFFING_SALAD = {cost: 20, calories: 5};
+                Hamburger.STUFFING_POTATO = {cost: 15, calories: 10};
+                Hamburger.TOPPING_MAYO = {cost: 20, calories: 5};
+                Hamburger.TOPPING_SPICE = {cost: 15, calories: 0};
+
+                /**
+                 * Добавить добавку к гамбургеру. Можно добавить несколько
+                 * добавок, при условии, что они разные.
+                 *
+                 * @param topping     Тип добавки
+                 */
+                Hamburger.prototype.addTopping = function (topping) {
+                    // Небезопасно, но другого способа пока не знаю
+                    this.toppings.push(eval('Hamburger.' + topping));
+                };
+
+                /**
+                 * Убрать все добавки.
+                 */
+                Hamburger.prototype.removeAllTopping = function () {
+                    this.toppings = [];
+                };
+
+                /**
+                 * Получить список добавок.
+                 */
+                Hamburger.prototype.getToppings = function () {
+                    return this.toppings;
+                };
+
+                /**
+                 * Узнать размер гамбургера
+                 */
+                Hamburger.prototype.getSize = function () {
+                    return this.size;
+                };
+
+                /**
+                 * Узнать начинку гамбургера
+                 */
+                Hamburger.prototype.getStuffing = function () {
+                    return this.stuffing;
+                };
+
+                /**
+                 * Установить размер гамбургера
+                 */
+                Hamburger.prototype.setSize = function (size) {
+                    // Небезопасно, но другого способа пока не знаю
+                    this.size = eval('Hamburger.' + size);
+                };
+
+                /**
+                 * Установить начинку гамбургера
+                 */
+                Hamburger.prototype.setStuffing = function (stuffing) {
+                    // Небезопасно, но другого способа пока не знаю
+                    this.stuffing = eval('Hamburger.' + stuffing);
+                };
+
+                /**
+                 * Узнать цену гамбургера
+                 * @return {Number} Цена в тугриках
+                 */
+                Hamburger.prototype.calculatePrice = function () {
+                    let price = this.getSize().cost + this.getStuffing().cost;
+                    this.getToppings().forEach(function (topping) {
+                        price += topping.cost;
+                    });
+                    return price;
+                };
+
+                /**
+                 * Узнать калорийность
+                 * @return {Number} Калорийность в калориях
+                 */
+                Hamburger.prototype.calculateCalories = function () {
+                    let calories = this.getSize().calories + this.getStuffing().calories;
+                    this.getToppings().forEach(function (topping) {
+                        calories += topping.calories;
+                    });
+                    return calories;
+                };
+
+                function calculateHamburger() {
+                    let hamburger = new Hamburger();
+                    let element = document.getElementsByName("size")[0];
+                    hamburger.setSize(element.options[element.selectedIndex].value);
+                    element = document.getElementsByName("stuffing")[0];
+                    hamburger.setStuffing(element.options[element.selectedIndex].value);
+                    hamburger.removeAllTopping();
+                    if (document.getElementsByName("topping_spice")[0].checked) {
+                        hamburger.addTopping('TOPPING_SPICE');
+                    }
+                    if (document.getElementsByName("topping_mayo")[0].checked) {
+                        hamburger.addTopping('TOPPING_MAYO');
+                    }
+                    document.getElementById('cost').innerHTML = hamburger.calculatePrice();
+                    document.getElementById('calories').innerHTML = hamburger.calculateCalories();
+                }
+
+                [... document.getElementsByTagName('select')].forEach(function (tag) {
+                    tag.addEventListener('change', calculateHamburger);
+                });
+                [... document.getElementsByTagName('input')].forEach(function (tag) {
+                    tag.addEventListener('change', calculateHamburger);
+                });
+
+                calculateHamburger();
+
+            }());
+        </script>
+    </body>
+</html>
