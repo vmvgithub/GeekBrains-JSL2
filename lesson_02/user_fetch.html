@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>User info</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            * {
+                margin: 0px;
+                padding: 0px;
+            }
+            a {
+                text-decoration: none;
+            }
+            .container {
+                width: 1200px;
+                margin: 20px auto;
+                text-align: center;
+                position: relative;
+            }
+            label {
+                padding: 10px;
+                font-weight: bold;
+            }
+            .user-list {
+                padding: 10px 0 0 20px;
+            }
+            .button {
+                display: inline-block;
+                background-color: gray;
+                width: 100px;
+                height: 28px;
+                border-radius: 14px;
+                border: none;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+                line-height: 28px;
+                outline: none;
+                text-align: center;
+            }
+            .flash {
+                display: none;
+                position: absolute;
+                width: 600px;
+                left: 285px;
+                padding: 10px;
+                color: white;
+                font-weight: bold;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                cursor: pointer;
+            }
+            .flash-error {
+                display: inline-block;
+                background-color: red;
+            }
+            .flash-success {
+                display: inline-block;
+                background-color: green;
+            }
+            .user-selector {
+                margin: 20px auto;
+                font-weight: bold;
+            }
+            .user-list {
+                width: 600px;
+                margin: 20px auto;
+            }
+            .user-list .user-row div{
+                float: left;
+                width: 30%;
+                padding: 5px;
+                border-top: 1px solid gray;
+                border-left: 1px solid gray;
+                margin-top: -1px;
+            }
+            .user-list .user-row div:last-child{
+                border-right: 1px solid gray;
+            }
+            .user-list .user-row:last-child div {
+                border-bottom: 1px solid gray;
+            }
+            .user-list .user-header div {
+                font-weight: bold;
+            }
+            .user-list .user-row div:last-child:after { content: " "; display: block; clear: both }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <form action="#">
+                <label>Имя: <input type="text" name="username"></label>
+                <label>E-mail: <input type="text" name="email"></label>
+                <label>Возраст: <input type="text" name="age"></label>
+                <a href="#" class="button" id="create-user-button">Создать</a>
+            </form>
+            <div class="flash" title="Click me for close"></div>
+            <div class="user-selector">Отобразить <select name="show-user"></select></div>
+            <div class="user-list"></div>
+        </div>
+        <script>
+            (function () {
+
+                let BASE_URL = 'http://89.108.65.123';
+
+                function createUser(event) {
+                    let username = document.querySelector('input[name=username]').value;
+                    let email = document.querySelector('input[name=email]').value;
+                    let age = document.querySelector('input[name=age]').value;
+                    if (checkInputData(username, email, age)) {
+                        fetch(`${BASE_URL}/user/`, {
+                            method: 'POST',
+                            body: JSON.stringify({name: username, email: email, age: age})
+                        }).then((res) => {
+                            return res.json();
+                        }).then((data) => {
+                            if (data.hasOwnProperty('error')) {
+                                showFlash(data.error, 'error');
+                            } else {
+                                getUsers();
+                                showFlash('Пользователь создан.', 'success');
+                            }
+                        }).catch(() => {
+                            showFlash('Пользователь не создан.', 'error');
+                        });
+                    }
+                    event.preventDefault();
+                }
+
+                function checkInputData(username, email, age) {
+                    let message = "";
+                    if (username.trim() === "") {
+                        message += '<p>Не задано имя.</p>';
+                    }
+                    if (!(new RegExp('([a-zA-Z0-9-_\.]+)(@)([a-zA-Z0-9-_\.]+)\.([a-z]{2,})')).test(email)) {
+                        message += '<p>Указан неправильный E-mail.</p>';
+                    }
+                    if (isNaN(age) || age <= 0) {
+                        message += '<p>Указан неправильный возраст.</p>';
+                    }
+                    if (message !== "") {
+                        showFlash(message, 'error');
+                    }
+                    return message === "";
+                }
+
+                function showFlash(message, type) {
+                    let flash = document.querySelector('.flash');
+                    flash.classList.remove('flash-error', 'flash-success');
+                    flash.innerHTML = message;
+                    flash.classList.add("flash-" + type);
+                    if (type === 'success') {
+                        setTimeout(function () {
+                            flash.classList.remove('flash-success');
+                        }, 3000);
+                    }
+                    flash.addEventListener('click', function () {
+                        flash.classList.remove('flash-error', 'flash-success');
+                    });
+                }
+
+                function getUsers(id) {
+                    fetch(`${BASE_URL}/user/${(id === undefined) ? "" : id}`).then((res) => {
+                        return res.json();
+                    }).then((data) => {
+                        if (data.hasOwnProperty('error')) {
+                            showFlash(data.error, 'error');
+                        } else {
+                            if (id === undefined) {
+                                fillSelect(data);
+                            }
+                            showUserList(data);
+                        }
+                    }).catch(() => {
+                        showFlash('Список пользователей не получен.', 'error');
+                    });
+                }
+
+                function fillSelect(users) {
+                    let options = '<option value="all">Всех</option>';
+                    users.forEach(function (user, index) {
+                        options += `<option value="${index + 1}">${user.name}</option>`;
+                    });
+                    let selector = document.querySelector('select[name=show-user]');
+                    selector.innerHTML = options;
+                    selector.addEventListener('change', function () {
+                        if (this.options[this.selectedIndex].value !== 'all') {
+                            getUsers(this.options[this.selectedIndex].value);
+                        } else {
+                            getUsers();
+                        }
+                    });
+                }
+
+                function showUserList(users) {
+                    let userTable = document.querySelector('.user-list');
+                    let userRows = `<div class="user-row user-header"><div>Имя</div><div>E-mail</div><div>Возраст</div></div>`;
+                    if (Array.isArray(users)) {
+                        users.forEach(function (user) {
+                            userRows += `<div class="user-row"><div>${user.name}</div><div>${user.email}</div><div>${user.age}</div></div>`;
+                        });
+                    } else {
+                        userRows += `<div class="user-row"><div>${users.name}</div><div>${users.email}</div><div>${users.age}</div></div>`;
+                    }
+                    userTable.innerHTML = userRows;
+                }
+
+                document.querySelector('#create-user-button').addEventListener('click', createUser);
+
+                getUsers();
+
+            }());
+        </script>
+    </body>
+</html>
+
