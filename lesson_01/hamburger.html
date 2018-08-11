@@ -83,13 +83,6 @@
                 };
 
                 /**
-                 * Убрать все добавки.
-                 */
-                Hamburger.prototype.removeAllTopping = function () {
-                    this.toppings = [];
-                };
-
-                /**
                  * Получить список добавок.
                  */
                 Hamburger.prototype.getToppings = function () {
@@ -152,25 +145,21 @@
 
                 function calculateHamburger() {
                     let hamburger = new Hamburger();
-                    let element = document.getElementsByName("size")[0];
+                    let element = document.querySelector("select[name=size]");
                     hamburger.setSize(element.options[element.selectedIndex].value);
-                    element = document.getElementsByName("stuffing")[0];
+                    element = document.querySelector("select[name=stuffing]");
                     hamburger.setStuffing(element.options[element.selectedIndex].value);
-                    hamburger.removeAllTopping();
-                    if (document.getElementsByName("topping_spice")[0].checked) {
+                    if (document.querySelector("input[name=topping_spice]").checked) {
                         hamburger.addTopping('TOPPING_SPICE');
                     }
-                    if (document.getElementsByName("topping_mayo")[0].checked) {
+                    if (document.querySelector("input[name=topping_mayo]").checked) {
                         hamburger.addTopping('TOPPING_MAYO');
                     }
                     document.getElementById('cost').innerHTML = hamburger.calculatePrice();
                     document.getElementById('calories').innerHTML = hamburger.calculateCalories();
                 }
 
-                [... document.getElementsByTagName('select')].forEach(function (tag) {
-                    tag.addEventListener('change', calculateHamburger);
-                });
-                [... document.getElementsByTagName('input')].forEach(function (tag) {
+                [... document.querySelectorAll('select, input')].forEach(function (tag) {
                     tag.addEventListener('change', calculateHamburger);
                 });
 
