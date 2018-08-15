@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Регулярные выражения</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            * {
+                margin: 0;
+                padding: 0
+            }
+            a {
+                text-decoration: none;
+            }
+            .container {
+                width: 1200px;
+                margin: 0 auto;
+            }
+            label {
+                display: block;
+                margin: 0 0 5px 0;
+            }
+
+            input, textarea {
+                display: block;
+                width: 400px;
+                margin: 0 0 10px 0;
+                border: 1px solid gainsboro;
+                padding: 5px;
+                outline: none;
+            }
+            textarea[name=source], textarea[name=destination] {
+                width: 900px;
+            }
+            h2 {
+                padding: 20px;
+            }
+            .button {
+                display: block;
+                background-color: gray;
+                width: 100px;
+                height: 28px;
+                border-radius: 14px;
+                border: none;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+                line-height: 28px;
+                outline: none;
+                text-align: center;
+                margin: 10px;
+            }
+            .flash {
+                display: none;
+                color: white;
+                padding: 10px;
+                width: 395px;
+                margin: 0 0 10px 0;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Замена кавычек</h2>
+            <form action="#">
+                <label for="source">Исходный текст</label>
+                <textarea name="source" id="source" rows="10">Maia: 'What's wrong, Jin? You look worried!'
+Jin: 'Well, my sister is coming to visit me this weekend.'
+Maia: 'Oh! That's great!'
+Jin: 'No! No it isn't! I have spent most of my time studying and working. I don't know what to do in this city!'
+Maia: 'I have done lots of stuff in the city! You don't need to be so anxious.'
+Jin: 'Really? You can help? Wow, thank you, Maia!'
+Maia: 'No problem, Jin! I'd be happy to give you some ideas.'
+Jin: 'OK, let's go!'
+Maia: 'So, what does your sister like? Clubs? Bars? Concerts?'
+Jin: 'Um, museums and architecture. Maybe I should do this on my own after all.'</textarea>
+                <label for="destination">Преобразованный текст</label>
+                <textarea name="destination" id="destination" rows="10"></textarea>
+            </form>
+            <h2>Форма обратной связи</h2>
+            <div class="flash"></div>
+            <form action="#">
+                <label for="name">Имя</label>
+                <input type="text" id="name" name="name">
+                <label for="phone">Телефон</label>
+                <input type="text" id="phone" name="phone">
+                <label for="email">E-mail</label>
+                <input type="text" id="email" name="email">
+                <label for="text">Текст</label>
+                <textarea name="text" id="text" rows="5"></textarea>
+                <a href="#" class="button" id="send">Отправить</a>
+            </form>
+        </div>
+        <script>
+            (function () {
+
+                // Замена кавычек
+                function replaceQuote() {
+                    var quoteRegExp = /:\s*['"](.*)['"]$/mg;
+                    document.querySelector('#destination').value = document.querySelector('#source').value.replace(quoteRegExp, ': "$1"');
+                }
+                document.querySelector('#source').addEventListener('input', replaceQuote);
+                replaceQuote();
+
+                // Обработка формы
+                function sendForm(event) {
+                    var name = document.querySelector('#name');
+                    name.style.border = '1px solid gainsboro';
+                    var phone = document.querySelector('#phone');
+                    phone.style.border = '1px solid gainsboro';
+                    var email = document.querySelector('#email');
+                    email.style.border = '1px solid gainsboro';
+                    var text = document.querySelector('#text');
+                    text.style.border = '1px solid gainsboro';
+                    var flash = document.querySelector('.flash');
+                    flash.style.display = 'none';
+                    if (checkFormData(name, phone, email, text)) {
+                        flash.style.display = 'block';
+                        flash.style.backgroundColor = 'green';
+                        flash.innerHTML = '<p>Ваше сообщение отправлено</p>';
+                        name.value = "";
+                        phone.value = "";
+                        email.value = "";
+                        text.value = "";
+                    }
+                    event.preventDefault();
+                }
+
+                function checkFormData(name, phone, email, text) {
+                    var message = "";
+                    if (!/^[a-zа-яё]+$/.test(name.value)) {
+                        name.style.border = '2px solid red';
+                        message += '<p>Имя должно содержать только буквы.</p>';
+                    }
+                    if (!/^\+7\(\d{3}\)\d{3}-\d{4}$/.test(phone.value)) {
+                        phone.style.border = '2px solid red';
+                        message += '<p>Указан неправильный формат телефона.</p>';
+                    }
+                    if (!/([a-zA-Z0-9-_\.]+)(@)([a-zA-Z0-9-_\.]+)\.([a-z]{2,})/.test(email.value)) {
+                        email.style.border = '2px solid red';
+                        message += '<p>Указан неправильный формат E-mail.</p>';
+                    }
+                    if (text.value.trim() === "") {
+                        text.style.border = '2px solid red';
+                        message += '<p>Текст не должен быть пустым.</p>';
+                    }
+                    if (message !== "") {
+                        var flash = document.querySelector('.flash');
+                        flash.style.display = 'block';
+                        flash.style.backgroundColor = 'red';
+                        flash.innerHTML = message;
+                    }
+                    return message === "";
+                }
+                document.querySelector('#send').addEventListener('click', sendForm);
+
+            }());
+        </script>
+    </body>
+</html>
+
