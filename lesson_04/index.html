@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>JQuery first steps</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            * {
+                margin: 0;
+                padding: 0
+            }
+            a {
+                text-decoration: none;
+            }
+            .container {
+                padding: 0 100px;
+            }
+            label {
+                display: block;
+                margin: 0 0 5px 0;
+            }
+            input, textarea,select {
+                display: block;
+                width: 400px;
+                margin: 0 0 10px 0;
+                border: 1px solid gainsboro;
+                padding: 5px;
+                outline: none;
+                border-radius: 5px;
+            }
+            select {
+                width: 412px;
+            }
+            h2 {
+                padding: 40px 0 20px 0;
+            }
+            .button {
+                display: block;
+                background-color: #08d092;
+                width: 144px;
+                height: 32px;
+                border-radius: 16px;
+                border: none;
+                color: #fff;
+                font-size: 18px;
+                line-height: 28px;
+                outline: none;
+                text-align: center;
+                margin: 10px;
+            }
+            .city-info {
+                display: none;
+                padding: 10px;
+                border: 1px solid gainsboro;
+                width: 390px;
+                border-radius: 5px;
+                margin: 0 0 10px 0;
+            }
+            .flash {
+                display: none;
+                color: white;
+                padding: 10px;
+                width: 395px;
+                margin: 0 0 10px 0;
+                border-radius: 5px;
+                font-size: 18px;
+            }
+            #my-tabs ul li {
+                display: inline-block;
+                position: relative;
+                top: 1px;
+                margin-right: -5px;
+                list-style: none;
+                padding: 10px;
+                border-left: 1px solid gainsboro;
+                border-top: 1px solid gainsboro;
+                border-right: 1px solid gainsboro;
+                border-radius: 7px 7px 0 0;
+                font-size: 18px;
+                line-height: 30px;
+                cursor: pointer;
+            }
+            #my-tabs div {
+                border: 2px solid #08d092;
+                padding: 10px;
+                border-radius: 0 10px 10px 10px;
+                display: none;
+            }
+            #my-tabs div p {
+                padding: 7px;
+            }
+            .my-active-tab-link {
+                background-color: #08d092;
+                border-left: 1px solid #08d092;
+                border-top: 1px solid #08d092;
+                border-right: 1px solid #08d092;
+                color: white;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>
+            $(function () {
+
+                // Обработка вкладок
+                $.fn.myTabs = function (options) {
+                    const settings = $.extend({
+                        'defaultTab': 1,
+                        'activeTabClass': 'active-tab-link'
+                    }, options);
+                    const $myTabs = this;
+                    const $myTabLinks = $('#' + $myTabs.attr('id') + ' ul li');
+                    $myTabLinks.removeClass(settings.activeTabClass).eq(settings.defaultTab - 1).addClass(settings.activeTabClass);
+                    $myTabs.children('div').hide().eq(settings.defaultTab - 1).show();
+                    $.each($myTabLinks, function (index, tag) {
+                        $(tag).on('click', function (e) {
+                            if (!$(this).hasClass(settings.activeTabClass)) {
+                                $myTabs.children('div').hide().eq(index).show();
+                                $myTabLinks.removeClass(settings.activeTabClass).eq(index).addClass(settings.activeTabClass);
+                            }
+                            e.preventDefault();
+                        });
+                    });
+                };
+                $('#my-tabs').myTabs(
+                        {
+                            'defaultTab': 2,
+                            'activeTabClass': 'my-active-tab-link'
+                        }
+                );
+
+                // Обработка формы
+                let cities = [];
+
+                function sendForm(event) {
+                    const form = getForm();
+                    hideFlash();
+                    if (checkFormData(form)) {
+                        showFlash('<p>Ваше сообщение отправлено.</p>');
+                        resetForm(form);
+                    }
+                    event.preventDefault();
+                }
+
+                function getForm() {
+                    return {
+                        'name': $('#name').css('border', '1px solid gainsboro'),
+                        'phone': $('#phone').css('border', '1px solid gainsboro'),
+                        'email': $('#email').css('border', '1px solid gainsboro'),
+                        'city': $('#city').css('border', '1px solid gainsboro'),
+                        'text': $('#text').css('border', '1px solid gainsboro')};
+                }
+
+                function checkFormData(form) {
+                    let message = "";
+                    const cityParts = form.city.val().split('/').map((parts) => parts.trim());
+                    if (!/^[a-zа-яёA-ZА-ЯЁ]+$/.test(form.name.val())) {
+                        form.name.css('border', '1px solid #d74a5c');
+                        message += '<p>Имя должно содержать только буквы.</p>';
+                    }
+                    if (!/^\+7\(\d{3}\)\d{3}-\d{4}$/.test(form.phone.val())) {
+                        form.phone.css('border', '1px solid #d74a5c');
+                        message += '<p>Указан неправильный формат телефона.</p>';
+                    }
+                    if (!/([a-zA-Z0-9-_\.]+)(@)([a-zA-Z0-9-_\.]+)\.([a-z]{2,})/.test(form.email.val())) {
+                        form.email.css('border', '1px solid #d74a5c');
+                        message += '<p>Указан неправильный формат E-mail.</p>';
+                    }
+                    if (findCity(cityParts[0], cityParts[1]) === undefined) {
+                        form.city.css('border', '1px solid #d74a5c');
+                        message += '<p>Вы не выбрали город.</p>';
+                    }
+                    if (form.text.val().trim() === "") {
+                        form.text.css('border', '1px solid #d74a5c');
+                        message += '<p>Текст не должен быть пустым.</p>';
+                    }
+                    if (message !== "") {
+                        showFlash(message, 'error');
+                    }
+                    return message === "";
+                }
+
+                function resetForm(form) {
+                    form.name.val('');
+                    form.phone.val('');
+                    form.email.val('');
+                    form.city.val('');
+                    form.text.val('');
+                    hideCityInfo();
+                }
+
+                function showFlash(message, type) {
+                    $('.flash').css('background-color', (type === 'error') ? '#db4e3f' : '#08d092').html(message).show();
+                }
+
+                function hideFlash() {
+                    $('.flash').hide();
+                }
+
+                function initForm() {
+                    $.ajax({
+                        url: 'http://89.108.65.123/cities/',
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.length) {
+                                cities = data;
+                                $('#city').on('input', showCities);
+                                $('#send').on('click', sendForm);
+                            } else {
+                                showFlash('<p>Не удалось получить список городов.</p><p>К сожалению Вы не сможете отправить сообщение.</p>', 'error');
+                            }
+                        },
+                        error: function (error) {
+                            showFlash('<p>Не удалось получить список городов.</p><p>К сожалению Вы не сможете отправить сообщение.</p>', 'error');
+                            console.log(error);
+                        }
+                    });
+                }
+
+                function showCityInfo(city) {
+                    if (city !== undefined) {
+                        $('#city-info').html(
+                                `<p><strong>Название:</strong> ${city.name}</p>
+                                 <p><strong>Округ:</strong> ${city.district}</p>
+                                 <p><strong>Субъект:</strong> ${city.subject}<p/>
+                                 <p><strong>Численность:</strong> ${city.population}</p>
+                                 <p><strong>Широта:</strong> ${city.coords.lat}</p>
+                                 <p><strong>Долгота:</strong> ${city.coords.lon}</p>`).show();
+                        $('#city').css('border', '1px solid gainsboro');
+                    }
+                }
+
+                function hideCityInfo() {
+                    $('#city-info').hide();
+                }
+
+                function findCity(name, subject) {
+                    return cities.find(function (city) {
+                        if (city.name === name && city.subject === subject) {
+                            return true;
+                        }
+                    });
+                }
+
+                function showCities(event) {
+                    const query = $(this).val().toLowerCase();
+                    const cityParts = $(this).val().split('/').map((parts) => parts.trim());
+                    hideCityInfo();
+                    $('#cities').empty();
+                    if (query.length >= 3) {
+                        cities.filter((city) => city.name.toLowerCase().indexOf(query) !== -1).forEach(function (city) {
+                            $('#cities').append(`<option value="${city.name} / ${city.subject}">`);
+                        });
+                    }
+                    showCityInfo(findCity(cityParts[0], cityParts[1]));
+                    event.preventDefault();
+                }
+
+                initForm();
+
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Вкладки</h2>
+            <div id="my-tabs">
+                <ul>
+                    <li>Первый текст</li>
+                    <li>Второй текст</li>
+                    <li>Третий текст</li>
+                    <li>Четвертый текст</li>
+                </ul>
+                <div>
+                    <p>Повседневная практика показывает, что рамки и место обучения кадров способствует подготовки и реализации направлений прогрессивного развития. Разнообразный и богатый опыт дальнейшее развитие различных форм деятельности обеспечивает широкому кругу (специалистов) участие в формировании систем массового участия. Таким образом постоянный количественный рост и сфера нашей активности требуют от нас анализа форм развития. Таким образом укрепление и развитие структуры позволяет оценить значение соответствующий условий активизации. Не следует, однако забывать, что реализация намеченных плановых заданий требуют от нас анализа существенных финансовых и административных условий.</p>
+                    <p>Идейные соображения высшего порядка, а также постоянное информационно-пропагандистское обеспечение нашей деятельности позволяет выполнять важные задания по разработке модели развития. Разнообразный и богатый опыт дальнейшее развитие различных форм деятельности представляет собой интересный эксперимент проверки новых предложений.</p>
+                </div>
+                <div>
+                    <p>Разнообразный и богатый опыт реализация намеченных плановых заданий представляет собой интересный эксперимент проверки систем массового участия. Значимость этих проблем настолько очевидна, что постоянный количественный рост и сфера нашей активности требуют определения и уточнения существенных финансовых и административных условий. Повседневная практика показывает, что консультация с широким активом играет важную роль в формировании новых предложений. Разнообразный и богатый опыт дальнейшее развитие различных форм деятельности обеспечивает широкому кругу (специалистов) участие в формировании существенных финансовых и административных условий. Равным образом постоянное информационно-пропагандистское обеспечение нашей деятельности представляет собой интересный эксперимент проверки существенных финансовых и административных условий. Не следует, однако забывать, что новая модель организационной деятельности играет важную роль в формировании дальнейших направлений развития.</p>
+                </div>
+                <div>
+                    <p>С другой стороны рамки и место обучения кадров в значительной степени обуславливает создание существенных финансовых и административных условий. Идейные соображения высшего порядка, а также консультация с широким активом требуют от нас анализа дальнейших направлений развития. Не следует, однако забывать, что постоянный количественный рост и сфера нашей активности в значительной степени обуславливает создание соответствующий условий активизации. Разнообразный и богатый опыт укрепление и развитие структуры влечет за собой процесс внедрения и модернизации новых предложений. Повседневная практика показывает, что новая модель организационной деятельности в значительной степени обуславливает создание форм развития.</p>
+                    <p>Разнообразный и богатый опыт постоянный количественный рост и сфера нашей активности требуют от нас анализа существенных финансовых и административных условий. С другой стороны рамки и место обучения кадров позволяет оценить значение направлений прогрессивного развития. Значимость этих проблем настолько очевидна, что рамки и место обучения кадров требуют от нас анализа модели развития. Идейные соображения высшего порядка, а также консультация с широким активом способствует подготовки и реализации новых предложений.</p>
+                </div>
+                <div>
+                    <p>Равным образом новая модель организационной деятельности представляет собой интересный эксперимент проверки существенных финансовых и административных условий. С другой стороны консультация с широким активом играет важную роль в формировании модели развития. Таким образом новая модель организационной деятельности влечет за собой процесс внедрения и модернизации новых предложений. Равным образом рамки и место обучения кадров обеспечивает широкому кругу (специалистов) участие в формировании форм развития.</p>
+                    <p>Товарищи! начало повседневной работы по формированию позиции позволяет выполнять важные задания по разработке позиций, занимаемых участниками в отношении поставленных задач. Идейные соображения высшего порядка, а также рамки и место обучения кадров позволяет выполнять важные задания по разработке соответствующий условий активизации. Равным образом консультация с широким активом позволяет оценить значение позиций, занимаемых участниками в отношении поставленных задач.</p>
+                </div>
+            </div>
+            <h2>Форма обратной связи</h2>
+            <div class="flash"></div>
+            <form action="#">
+                <label for="name">Имя</label>
+                <input type="text" id="name" name="name" placeholder="Олимпиада">
+                <label for="phone">Телефон</label>
+                <input type="text" id="phone" name="phone" placeholder="+7(000)000-0000">
+                <label for="email">E-mail</label>
+                <input type="text" id="email" name="email" placeholder="olympiad@russia.info">
+                <label for="city">Город</label>
+                <input list="cities" id="city" name="city" placeholder="Сочи">
+                <div class="city-info" id="city-info"></div>
+                <datalist id="cities"></datalist>
+                <label for="text">Текст</label>
+                <textarea name="text" id="text" rows="5"></textarea>
+                <a href="#" class="button" id="send">Отправить</a>
+            </form>
+        </div>
+    </body>
+</html>
+
