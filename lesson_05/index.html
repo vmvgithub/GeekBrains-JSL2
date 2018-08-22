@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Cart and Comments page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <style>
+            * {
+                margin: 0;
+                padding: 0
+            }
+            a {
+                text-decoration: none;
+                color: blue;
+            }
+            a:active {
+                color: blue;
+            }
+            .container {
+                padding: 0 100px;
+            }
+            select, textarea {
+                margin: 0 0 10px 0;
+                border: 1px solid gainsboro;
+                padding: 5px;
+                outline: none;
+                border-radius: 5px;
+            }
+            select {
+                width: 420px;
+            }
+            textarea {
+                width: 410px;
+            }
+            h2 {
+                padding: 40px 0 20px 0;
+            }
+            .button {
+                display: block;
+                background-color: #08d092;
+                width: 144px;
+                height: 32px;
+                border-radius: 16px;
+                border: none;
+                color: #fff;
+                font-size: 18px;
+                line-height: 28px;
+                outline: none;
+                text-align: center;
+                margin: 5px;
+            }
+            #cart > div {
+                border: 1px solid gainsboro;
+                border-radius: 5px;
+                margin: 10px 0 0 0;
+                padding: 10px;
+                width: 400px;
+                height: 64px;
+            }
+            #cart > div > div:first-child{
+                float: left;
+                width: 300px;
+                font-size: 18px;
+                line-height: 32px;
+            }
+            #cart > div > div:last-child{
+                float: right;
+                height: 64px;
+                line-height: 64px;
+            }
+            #cart > span {
+                display: block;
+                padding: 10px;
+            }
+            #comments > div {
+                border: 1px solid gainsboro;
+                border-radius: 5px;
+                margin: 0 0 10px 0;
+                padding: 10px;
+                width: 400px;
+            }
+
+            #comments > div p {
+                margin: 10px;
+            }
+            #comments > div a {
+                margin: 10px;
+            }
+            #comments > form label {
+                display: block;
+                margin: 20px 10px 10px 10px;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>
+            $(function () {
+
+                // Работа с корзиной
+                class Cart {
+
+                    constructor(baseUrl, container) {
+                        this.container = container;
+                        this.baseUrl = baseUrl;
+                        this.data = null;
+                        this.getCart();
+                        this.initAddButton();
+                    }
+
+                    async addProduct() {
+                        const price = $(this.container + ' form select').val();
+                        const name = $(this.container + ' form select option:selected').text();
+                        await $.ajax({
+                            url: `${this.baseUrl}/shop?user_id=${this.data.user_id}&product=${name}&price=${price}`,
+                            type: 'POST',
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                        this.getCart();
+                    }
+
+                    async removeProduct(product_id) {
+                        await $.ajax({
+                            url: `${this.baseUrl}/shop?user_id=${this.data.user_id}&product_id=${product_id}`,
+                            type: 'DELETE',
+                            success: (data) => this.data = data,
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                        this.render();
+                    }
+
+                    async getCart() {
+                        await $.ajax({
+                            url: `${this.baseUrl}/shop` + ((this.data) ? `?user_id=${this.data.user_id}` : ''),
+                            dataType: "json",
+                            success: (data) => this.data = data,
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                        this.render();
+                    }
+
+                    render() {
+                        let total = 0;
+                        $(this.container + ' div').remove();
+                        this.data.cart.forEach((item) => {
+                            $(this.container).prepend(`<div><div><h3>${item.product}</h3><p>${item.price} тугриков</p></div><div><a href="#" data-product-id="${item.product_id}" title="Удалить">удалить</a></div></div>`);
+                            total += Number(item.price);
+                        });
+                        $(this.container + ' div a').on('click', (event) => {
+                            event.preventDefault();
+                            this.removeProduct($(event.target).data('product-id'));
+                        });
+                        $(this.container + ' span').empty();
+                        if (total) {
+                            $(this.container + ' span').html(`<strong>Итого:</strong> ${total} тугриков`);
+                        }
+                    }
+
+                    initAddButton() {
+                        $(this.container + ' form a').on('click', (event) => {
+                            event.preventDefault();
+                            this.addProduct();
+                        });
+                    }
+                }
+
+                new Cart('http://89.108.65.123:8080', '#cart');
+
+                // Работа с комментариями
+                class Comments {
+
+                    constructor(baseUrl, container) {
+                        this.container = container;
+                        this.baseUrl = baseUrl;
+                        this.data = null;
+                        this.get();
+                        this.initAddButton();
+                    }
+
+                    async get() {
+                        await $.ajax({
+                            url: `${this.baseUrl}/comments`,
+                            dataType: "json",
+                            success: (data) => this.data = data,
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                        this.render();
+                    }
+
+                    async add() {
+                        const comment = $(this.container + ' form textarea').val();
+                        if (comment.trim() !== "") {
+                            await $.ajax({
+                                url: `${this.baseUrl}/comments?text=${comment}`,
+                                type: 'POST',
+                                dataType: "json",
+                                success: (data) => {
+                                    this.data.unshift(data);
+                                    this.render();
+                                },
+                                error: function (error) {
+                                    console.log(error);
+                                }
+                            });
+                            $(this.container + ' form textarea').val('');
+                        }
+                    }
+
+                    async delete(id) {
+                        await $.ajax({
+                            url: `${this.baseUrl}/comments?comment_id=${id}`,
+                            type: 'DELETE',
+                            dataType: "json",
+                            success: (data) => {
+                                this.data = this.data.filter((comment) => comment.comment_id !== data.comment_id);
+                                this.render();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+
+                    async approve(id) {
+                        await $.ajax({
+                            url: `${this.baseUrl}/comments?comment_id=${id}`,
+                            type: 'PATCH',
+                            dataType: "json",
+                            success: (data) => {
+                                this.data = this.data.map((comment) => {
+                                    if (comment.comment_id === data.comment_id) {
+                                        comment.likes = data.likes;
+                                    }
+                                    return comment;
+                                });
+                                this.render();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+
+                    render() {
+                        $(this.container + ' div').remove();
+                        this.data.forEach((comment) => {
+                            $(this.container).prepend(
+                                    `<div>
+                                        <p>${comment.text}</p>
+                                        <p>Одобрено: ${comment.likes}</p>
+                                        <a href="#" data-comment-id="${comment.comment_id}" title="Удалить">удалить</a>
+                                        <a href="#" data-comment-id="${comment.comment_id}" title="Одобрить">одобрить</a>
+                                     </div>`);
+                        });
+                        $(this.container + ' div a:nth-child(3)').on('click', (event) => {
+                            event.preventDefault();
+                            this.delete($(event.target).data('comment-id'));
+                        });
+                        $(this.container + ' div a:nth-child(4)').on('click', (event) => {
+                            event.preventDefault();
+                            this.approve($(event.target).data('comment-id'));
+                        });
+                    }
+
+                    initAddButton() {
+                        $(this.container + ' form a').on('click', (event) => {
+                            event.preventDefault();
+                            this.add();
+                        });
+                    }
+                }
+
+                new Comments('http://89.108.65.123:8080', '#comments');
+
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+            <h2>Корзина</h2>
+            <div id="cart">
+                <span></span>
+                <form action="#">
+                    <select name="product">
+                        <option value="1000">Продукт 1</option>
+                        <option value="3000">Продукт 2</option>
+                        <option value="2000">Продукт 3</option>
+                        <option value="4000">Продукт 4</option>
+                        <option value="9000">Продукт 5</option>
+                    </select>
+                    <a href="#" class="button">Добавить</a>
+                </form>
+            </div>
+
+            <h2>Комментарии</h2>
+            <div id="comments">
+                <form action="#">
+                    <label for="new-comment">Ваш комментарий:</label>
+                    <textarea name="new-comment" id="new-comment" rows="5"></textarea>
+                    <a href="#" class="button">Отправить</a>
+                </form>
+            </div>
+
+        </div>
+    </body>
+</html>
+
