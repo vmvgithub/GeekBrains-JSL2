@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>JQuery UI first step</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0
+            }
+            .container {
+                padding: 0 50px;
+            }
+            a {
+                text-decoration: none;
+                color: #08d092;
+            }
+            a:active {
+                color: #08d092;
+            }
+            label {
+                display: block;
+                margin: 0 0 5px 0;
+            }
+            input, textarea,select {
+                display: block;
+                width: 400px;
+                margin: 0 0 10px 0;
+                border: 1px solid gainsboro;
+                padding: 5px;
+                outline: none;
+                border-radius: 5px;
+            }
+            select {
+                width: 412px;
+            }
+            h2 {
+                padding: 20px 0 10px 0;
+            }
+            .button {
+                display: block;
+                background-color: #08d092;
+                width: 144px;
+                height: 32px;
+                border-radius: 16px;
+                border: none;
+                color: #fff;
+                font-size: 18px;
+                line-height: 28px;
+                outline: none;
+                text-align: center;
+                margin: 10px;
+            }
+            .ui-widget {
+                font-size: 16px;
+            }
+            .ui-widget-header-info {
+                border: 1px solid #aaaaaa;
+                background: #08d092;
+                color: #fff;
+                font-weight: bold;
+            }
+            .ui-widget-header-error {
+                border: 1px solid #aaaaaa;
+                background: #d74a5c;
+                color: #fff;
+                font-weight: bold;
+            }
+            .ui-dialog .ui-dialog-titlebar-close {
+                outline: none;
+            }
+            .ui-datepicker {
+                width: 400px;
+            }
+            .ui-datepicker-title select {
+                display: inline-block;
+            }
+            .products{
+                width: 500px;
+                height: 200px;
+                position:relative;
+            }
+            .products h2 {
+                padding: 10px 0 0 0;
+            }
+            .products .product {
+                margin: 0 auto;
+                border: 1px solid gainsboro;
+                border-radius: 5px;
+                padding: 20px;
+                width: 250px;
+                display: none;
+                text-align: center;
+            }
+            .products .arrow-right{
+                border-bottom: 20px solid #fff;
+                border-top: 20px solid #fff;
+                border-left: 20px solid #08d092;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .products .arrow-left {
+                border-bottom: 20px solid #fff;
+                border-top: 20px solid #fff;
+                border-right: 20px solid #08d092;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .products .arrow-left{
+                left: 20px;
+                cursor: pointer;
+            }
+            .products .arrow-right{
+                right: 20px;
+                cursor: pointer;
+            }
+            .products .wrap{
+                width: 100%;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .product p {
+                line-height: 36px;
+            }
+            .product:nth-child(2) {
+                display: block;
+            }
+            .products span {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0;
+            }
+            #cart {
+                width: 500px;
+                height: 150px;
+                border: 1px solid gainsboro;
+                border-radius: 5px;
+                overflow-y: scroll;
+                max-height: 150px;
+                padding: 10px;
+            }
+            #cart > div {
+                margin: 0px 0 15px 0;
+                overflow: auto;
+            }
+            #cart > div > div:first-child{
+                float: left;
+                width: 300px;
+                font-size: 18px;
+                line-height: 32px;
+            }
+            #cart > div > div:last-child{
+                float: right;
+                height: 64px;
+                line-height: 64px;
+            }
+        </style>
+        <script>
+            $(function () {
+
+                // Работа с формой обратной связи
+                class FeedBack {
+
+                    constructor(container, baseUrl) {
+                        this.container = container;
+                        this.baseUrl = baseUrl;
+                        this.dialog = this.initDialogWidget();
+                        this.initCityField();
+                        this.initBirthDayField();
+                        this.initSendButton();
+
+                    }
+
+                    async initCityField() {
+                        await $.ajax({
+                            url: `${this.baseUrl}/cities/`,
+                            dataType: "json",
+                            success: (data) => {
+                                if (data.length === 0) {
+                                    this.showDialog('Не удалось загрузить список городов.', 'error');
+                                    return;
+                                }
+                                $(`${this.container} #city`).autocomplete({
+                                    source: data.map(function (city, index) {
+                                        return {label: city.name, id: `city-${index}`};
+                                    }),
+                                    minLength: 3,
+                                    select: (event, ui) => {
+                                        const city = data[ui.item.id.replace('city-', '')];
+                                        this.showDialog(
+                                                `<p><strong>Название:</strong> ${city.name}</p>
+                                                 <p><strong>Округ:</strong> ${city.district}</p>
+                                                 <p><strong>Субъект:</strong> ${city.subject}<p/>
+                                                 <p><strong>Численность:</strong> ${city.population}</p>
+                                                 <p><strong>Широта:</strong> ${city.coords.lat}</p>
+                                                 <p><strong>Долгота:</strong> ${city.coords.lon}</p>`,
+                                                'info');
+                                    }
+                                });
+                            },
+                            error: () => {
+                                this.showDialog('Не удалось загрузить список городов.', 'error');
+                            }
+                        });
+                    }
+
+                    initBirthDayField() {
+                        $(`${this.container} #birthday`).datepicker({
+                            dateFormat: "dd.mm.yy",
+                            changeMonth: true,
+                            changeYear: true,
+                            monthNamesShort: [
+                                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+                            ],
+                            dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+                        });
+                    }
+
+                    initSendButton() {
+                        $(`${this.container} #send`).on('click', (event) => {
+                            this.sendForm(event);
+                        });
+                    }
+
+                    initDialogWidget() {
+                        return $(`${this.container} #dialog`).dialog({
+                            autoOpen: false,
+                            width: '400px'
+                        });
+                    }
+
+                    showDialog(message, type) {
+                        if (type === 'error') {
+                            this.dialog.dialog('option', 'title', 'Ошибка');
+                            this.dialog.dialog("option", "classes.ui-widget-header", "ui-widget-header-error");
+                        } else {
+                            this.dialog.dialog('option', 'title', 'Информация');
+                            this.dialog.dialog("option", "classes.ui-widget-header", "ui-widget-header-info");
+                        }
+                        this.dialog.html(message);
+                        this.dialog.dialog('open');
+                    }
+
+                    hideDialog() {
+                        this.dialog.dialog('close');
+                    }
+
+                    sendForm(event) {
+                        const form = this.getForm();
+                        this.hideDialog();
+                        if (this.checkFormData(form)) {
+                            this.showDialog('<p>Ваше сообщение отправлено.</p>', 'info');
+                            this.resetForm(form);
+                        }
+                        event.preventDefault();
+                    }
+
+                    getForm() {
+                        return {
+                            'name': $(`${this.container} #name`).css('border', '1px solid gainsboro'),
+                            'phone': $(`${this.container} #phone`).css('border', '1px solid gainsboro'),
+                            'email': $(`${this.container} #email`).css('border', '1px solid gainsboro'),
+                            'birthday': $(`${this.container} #birthday`).css('border', '1px solid gainsboro'),
+                            'city': $(`${this.container} #city`).css('border', '1px solid gainsboro'),
+                            'text': $(`${this.container} #text`).css('border', '1px solid gainsboro')};
+                    }
+
+                    checkFormData(form) {
+                        let message = "";
+                        if (!/^[a-zа-яёA-ZА-ЯЁ]+$/.test(form.name.val())) {
+                            this.invalidFiled(form.name);
+                            message += '<p>Имя должно содержать только буквы.</p>';
+                        }
+                        if (!/^\+7\(\d{3}\)\d{3}-\d{4}$/.test(form.phone.val())) {
+                            this.invalidFiled(form.phone);
+                            message += '<p>Указан неправильный формат телефона.</p>';
+                        }
+                        if (!/([a-zA-Z0-9-_\.]+)(@)([a-zA-Z0-9-_\.]+)\.([a-z]{2,})/.test(form.email.val())) {
+                            this.invalidFiled(form.email);
+                            message += '<p>Указан неправильный формат E-mail.</p>';
+                        }
+                        if (form.birthday.val().trim() === "") {
+                            this.invalidFiled(form.birthday);
+                            message += '<p>Вы не сообщили день рождения.</p>';
+                        }
+                        if (form.city.val().trim() === "") {
+                            this.invalidFiled(form.city);
+                            message += '<p>Вы не выбрали город.</p>';
+                        }
+                        if (form.text.val().trim() === "") {
+                            this.invalidFiled(form.text);
+                            message += '<p>Текст не должен быть пустым.</p>';
+                        }
+                        if (message !== "") {
+                            this.showDialog(message, 'error');
+                        }
+                        return message === "";
+                    }
+
+                    invalidFiled(field) {
+                        field.css('border', '1px solid #d74a5c').toggle("bounce").toggle("bounce");
+                    }
+
+                    resetForm(form) {
+                        form.name.val('');
+                        form.phone.val('');
+                        form.email.val('');
+                        form.birthday.val('');
+                        form.city.val('');
+                        form.text.val('');
+                    }
+
+                }
+
+                // Работа с каруселью популярных товаров
+                class Products {
+
+                    constructor(container) {
+                        this.container = container;
+                        this.allProducts = $(`${this.container} .product`).length;
+                        this.currentProduct = 1;
+                        this.initProducts();
+                        this.initArrows();
+                        this.showCounter();
+                    }
+
+                    initProducts() {
+                        $.each($(`${this.container} .product`), (index, product) => {
+                            const name = $(product).data('name');
+                            const price = $(product).data('price');
+                            $(product).html(`<h3>${name}</h3><p>${price} тугриков</p>`);
+                        });
+                    }
+
+                    initArrows() {
+                        $(`${this.container} .arrow-left`).on('click', () => {
+                            this.onArrowLeft();
+                        });
+                        $(this.container + ' .arrow-right').on('click', () => {
+                            this.onArrowRight();
+                        });
+                    }
+
+                    onArrowLeft() {
+                        $('.product').hide();
+                        this.currentProduct = (this.currentProduct > 1) ? --this.currentProduct : this.allProducts;
+                        $(`${this.container} .product:nth-child(${(this.currentProduct + 1)})`).show();
+                        this.showCounter();
+                    }
+
+                    onArrowRight() {
+                        $('.product').hide();
+                        this.currentProduct = (this.currentProduct < this.allProducts) ? ++this.currentProduct : 1;
+                        $(`${this.container} .product:nth-child(${(this.currentProduct + 1)})`).show();
+                        this.showCounter();
+                    }
+
+                    showCounter() {
+                        $(`${this.container} span`).html(`${this.currentProduct} / ${this.allProducts}`);
+                    }
+                }
+
+                // Работа с корзиной
+                class Cart {
+
+                    constructor(container, products) {
+                        this.container = container;
+                        this.products = products;
+                        this.items = [];
+                        this.initProducts();
+                        this.initCart();
+                    }
+
+                    initCart() {
+                        $(this.container).droppable({
+                            drop: (event, ui) => {
+                                const name = $(ui.draggable[0]).data("name");
+                                const price = $(ui.draggable[0]).data("price");
+                                this.items.push({name: name, price: price});
+                                this.renderCart();
+                            }
+                        });
+                        this.renderCart();
+                    }
+
+                    initProducts() {
+                        $(this.products).draggable({
+                            revert: true
+                        });
+                    }
+
+                    removeProduct(id) {
+                        this.items.splice(id, 1);
+                        this.renderCart();
+                    }
+
+                    renderCart() {
+                        $(`${this.container} div`).remove();
+                        if (this.items.length) {
+                            this.items.forEach((item, index) => {
+                                $(this.container).prepend(`<div><div><h3>${item.name}</h3><p>${item.price} тугриков</p></div><div><a href="#" data-product-id="cart-product-id-${index}" title="Удалить">удалить</a></div></div>`);
+                            });
+                            $(`${this.container} div a`).on('click', (event) => {
+                                event.preventDefault();
+                                this.removeProduct($(event.target).data('product-id').replace('cart-product-id-', ''));
+                            });
+                        } else {
+                            $(this.container).prepend(`<div><p>Ваша корзина пуста.</p><p>&nbsp;</p><p>Перетаскивайте продукты из карусели сюда.</p></div>`);
+                        }
+                    }
+                }
+
+                new FeedBack('#feedback', 'http://89.108.65.123');
+                new Products('.products');
+                new Cart('#cart', '.products .product');
+
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="products">
+                <h2>Карусель популярных товаров</h2>
+                <div class="wrap">
+                    <div class="arrow-left"></div>
+                    <div class="product" data-name="Продукт 1" data-price="1000"></div>
+                    <div class="product" data-name="Продукт 2" data-price="2000"></div>
+                    <div class="product" data-name="Продукт 3" data-price="3000"></div>
+                    <div class="product" data-name="Продукт 4" data-price="4000"></div>
+                    <div class="product" data-name="Продукт 5" data-price="5000"></div>
+                    <div class="arrow-right"></div>
+                </div>
+                <span></span>
+            </div>
+
+            <h2>Корзина</h2>
+            <div id="cart"></div>
+
+            <div id="feedback">
+                <h2>Форма обратной связи</h2>
+                <form action="#">
+                    <label for="name">Имя</label>
+                    <input type="text" id="name" name="name" placeholder="Олимпиада">
+                    <label for="phone">Телефон</label>
+                    <input type="text" id="phone" name="phone" placeholder="+7(000)000-0000">
+                    <label for="email">E-mail</label>
+                    <input type="text" id="email" name="email" placeholder="olympiad@russia.info">
+                    <label for="birthday">День рождения</label>
+                    <input type="text" id="birthday" name="birthday">
+                    <label for="city">Город</label>
+                    <input type="text" id="city" name="city" placeholder="Сочи">
+                    <label for="text">Текст</label>
+                    <textarea name="text" id="text" rows="5"></textarea>
+                    <a href="#" class="button" id="send">Отправить</a>
+                </form>
+                <div id="dialog"></div>
+            </div>
+
+        </div>
+    </body>
+</html>
+
