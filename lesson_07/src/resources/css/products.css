@@ -1,0 +1,61 @@
+.products{
+    width: 500px;
+    height: 200px;
+    position:relative;
+}
+.products h2 {
+    padding: 10px 0 0 0;
+}
+.products .product {
+    margin: 0 auto;
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    padding: 20px;
+    width: 250px;
+    display: none;
+    text-align: center;
+}
+.products .arrow-right{
+    border-bottom: 20px solid #fff;
+    border-top: 20px solid #fff;
+    border-left: 20px solid #08d092;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.products .arrow-left {
+    border-bottom: 20px solid #fff;
+    border-top: 20px solid #fff;
+    border-right: 20px solid #08d092;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.products .arrow-left{
+    left: 20px;
+    cursor: pointer;
+}
+.products .arrow-right{
+    right: 20px;
+    cursor: pointer;
+}
+.products .wrap{
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.product p {
+    line-height: 36px;
+}
+.product:nth-child(2) {
+    display: block;
+}
+.products span {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0;
+}
+

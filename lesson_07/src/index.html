@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Gulp first step</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
+        <!--build:js resources/js/main.min.js -->
+        <script src="resources/js/feedback.js"></script>
+        <script src="resources/js/products.js"></script>
+        <script src="resources/js/cart.js"></script>
+        <!-- endbuild -->
+        <!--build:css resources/css/styles.min.css-->
+        <link href="resources/css/main.css" rel="stylesheet">
+        <link href="resources/css/feedback.css" rel="stylesheet">
+        <link href="resources/css/products.css" rel="stylesheet">
+        <link href="resources/css/cart.css" rel="stylesheet">
+        <!--endbuild-->
+    </head>
+    <body>
+
+        <div class="container">
+
+            <div class="products">
+                <h2>Карусель популярных товаров</h2>
+                <div class="wrap">
+                    <div class="arrow-left"></div>
+                    <div class="product" data-name="Продукт 1" data-price="1000"></div>
+                    <div class="product" data-name="Продукт 2" data-price="2000"></div>
+                    <div class="product" data-name="Продукт 3" data-price="3000"></div>
+                    <div class="product" data-name="Продукт 4" data-price="4000"></div>
+                    <div class="product" data-name="Продукт 5" data-price="5000"></div>
+                    <div class="arrow-right"></div>
+                </div>
+                <span></span>
+            </div>
+
+            <h2>Корзина</h2>
+            <div id="cart"></div>
+
+            <div id="feedback">
+                <h2>Форма обратной связи</h2>
+                <form action="#">
+                    <label for="name">Имя</label>
+                    <input type="text" id="name" name="name" placeholder="Олимпиада">
+                    <label for="phone">Телефон</label>
+                    <input type="text" id="phone" name="phone" placeholder="+7(000)000-0000">
+                    <label for="email">E-mail</label>
+                    <input type="text" id="email" name="email" placeholder="olympiad@russia.info">
+                    <label for="birthday">День рождения</label>
+                    <input type="text" id="birthday" name="birthday">
+                    <label for="city">Город</label>
+                    <input type="text" id="city" name="city" placeholder="Сочи">
+                    <label for="text">Текст</label>
+                    <textarea name="text" id="text" rows="5"></textarea>
+                    <a href="#" class="button" id="send">Отправить</a>
+                </form>
+                <div id="dialog"></div>
+            </div>
+
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,18 @@
+{
+  "name": "lesson_07",
+  "version": "1.0.0",
+  "description": "lesson_07",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.10.0",
+    "gulp-if": "^2.0.2",
+    "gulp-uglify-es": "^1.0.4",
+    "gulp-useref": "^3.1.5"
+  }
+}

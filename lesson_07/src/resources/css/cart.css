@@ -1,0 +1,25 @@
+#cart {
+    width: 500px;
+    height: 150px;
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    overflow-y: scroll;
+    max-height: 150px;
+    padding: 10px;
+}
+#cart > div {
+    margin: 0px 0 15px 0;
+    overflow: auto;
+}
+#cart > div > div:first-child{
+    float: left;
+    width: 300px;
+    font-size: 18px;
+    line-height: 32px;
+}
+#cart > div > div:last-child{
+    float: right;
+    height: 64px;
+    line-height: 64px;
+}
+
