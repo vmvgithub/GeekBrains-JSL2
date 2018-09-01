@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Cart test</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="../../src/resources/css/style.css" rel="stylesheet" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="../../src/resources/js/cart.js"></script>
+
+        <!-- Setup test: begin -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.1.2/chai.js"></script>
+        <script src="test.js"></script>
+        <!-- Setup test: end -->
+
+    </head>
+    <body>
+        <div class="container">
+            <h2>Корзина</h2>
+            <div id="cart">
+                <span></span>
+                <form action="#">
+                    <select name="product">
+                        <option value="1000">Продукт 1</option>
+                        <option value="3000">Продукт 2</option>
+                        <option value="2000">Продукт 3</option>
+                        <option value="4000">Продукт 4</option>
+                        <option value="9000">Продукт 5</option>
+                    </select>
+                    <a href="#" class="button">Добавить</a>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
+

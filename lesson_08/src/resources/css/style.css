@@ -1,0 +1,72 @@
+* {
+    margin: 0;
+    padding: 0
+}
+a {
+    text-decoration: none;
+    color: blue;
+}
+a:active {
+    color: blue;
+}
+.container {
+    width: 800px;
+    margin: 0 auto;
+}
+.container h2 {
+    margin: 20px 0 0 0;
+}
+.container select, .container textarea {
+    margin: 0 0 10px 0;
+    border: 1px solid gainsboro;
+    padding: 5px;
+    outline: none;
+    border-radius: 5px;
+}
+.container select {
+    width: 420px;
+}
+.container textarea {
+    width: 410px;
+}
+.container #id {
+    margin: 10px 0 0 0;
+}
+.container .button {
+    display: block;
+    background-color: #08d092;
+    width: 144px;
+    height: 32px;
+    border-radius: 16px;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    line-height: 28px;
+    outline: none;
+    text-align: center;
+    margin: 5px;
+}
+.container #cart > div {
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    margin: 10px 0 0 0;
+    padding: 10px;
+    width: 400px;
+    height: 64px;
+}
+.container #cart > div > div:first-child{
+    float: left;
+    width: 300px;
+    font-size: 18px;
+    line-height: 32px;
+}
+.container #cart > div > div:last-child{
+    float: right;
+    height: 64px;
+    line-height: 64px;
+}
+.container #cart > span {
+    display: block;
+    padding: 10px;
+}
+
